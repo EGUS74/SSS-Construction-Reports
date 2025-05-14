@@ -1,6 +1,7 @@
 
 "use client";
 
+import * as React from "react"; // Added this line
 import type { DailyReport } from "@/types";
 import { format, parseISO } from "date-fns";
 import Image from "next/image";
