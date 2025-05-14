@@ -26,10 +26,9 @@ export function Header() {
 
   useEffect(() => {
     // For "Last Synced" - using current time as a placeholder
-    setCurrentTime(format(new Date(), "h:mm a"));
-    const timer = setInterval(() => {
-      setCurrentTime(format(new Date(), "h:mm a"));
-    }, 60000); // Update every minute
+    const updateTime = () => setCurrentTime(format(new Date(), "h:mm a"));
+    updateTime(); // Set initial time immediately
+    const timer = setInterval(updateTime, 60000); // Update every minute
     return () => clearInterval(timer);
   }, []);
 
@@ -62,11 +61,11 @@ export function Header() {
         
         <div className="flex items-center gap-1 text-sm text-muted-foreground" title="Last synced with server">
           <Clock className="h-4 w-4" />
-          <span>{currentTime}</span>
+          <span>{currentTime || "Loading..."}</span>
         </div>
 
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Lock className="h-4 w-4 text-green-500" titleAccess="Secure Connection" />
+          <Lock className="h-4 w-4 text-green-500" title="Secure Connection" />
           <div className="flex items-center gap-1" title={isOffline ? "Offline Mode" : "Online Mode"}>
             {isOffline ? <WifiOff className="h-5 w-5 text-destructive" /> : <Wifi className="h-5 w-5 text-green-500" />}
             <span>{isOffline ? "Offline" : "Online"}</span>
@@ -108,3 +107,4 @@ export function Header() {
     </header>
   );
 }
+
