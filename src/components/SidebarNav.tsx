@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -25,7 +26,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { href: "/foreman/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["foreman"] },
-  { href: "/foreman/new-report", label: "New Daily Report", icon: FilePlus2, roles: ["foreman"] },
+  { href: "/foreman/new-report", label: "Daily Log", icon: FilePlus2, roles: ["foreman"] },
   { href: "/foreman/my-reports", label: "My Reports", icon: ListChecks, roles: ["foreman"] },
   { href: "/admin/dashboard", label: "Overview", icon: LayoutDashboard, roles: ["admin"] },
   { href: "/admin/all-reports", label: "All Reports", icon: ListChecks, roles: ["admin"] },

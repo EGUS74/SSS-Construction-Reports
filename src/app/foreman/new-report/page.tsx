@@ -1,3 +1,4 @@
+
 "use client";
 
 import { DailyReportForm } from "@/components/forms/DailyReportForm";
@@ -35,7 +36,7 @@ export default function NewReportPage() {
           <CardHeader>
             <CardTitle className="text-2xl flex items-center">
               <FileText className="mr-2 h-6 w-6 text-green-500" />
-              Report Submitted Successfully!
+              Daily Log Submitted Successfully!
             </CardTitle>
             <CardDescription>
               {submissionResult.message} (Report ID: {submissionResult.reportId || 'N/A'})
@@ -67,7 +68,7 @@ export default function NewReportPage() {
               </div>
             )}
             <Button onClick={() => { setSubmissionResult(null); router.push('/foreman/new-report'); }} className="mt-4">
-              Create Another Report
+              Create Another Daily Log
             </Button>
              <Button variant="outline" onClick={() => router.push('/foreman/my-reports')} className="mt-4 ml-2">
               View My Reports
@@ -85,7 +86,7 @@ export default function NewReportPage() {
         <CardHeader>
           <CardTitle className="text-3xl font-bold tracking-tight flex items-center">
              <FileText className="mr-3 h-8 w-8 text-primary" />
-            Create New Daily Report
+            Create Daily Log
           </CardTitle>
           <CardDescription className="text-md">
             Fill in the details for today's activities. Ensure all information is accurate and complete.

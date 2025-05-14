@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -70,10 +71,10 @@ export default function ForemanDashboard() {
       <div className="grid gap-6 md:grid-cols-2">
         <Card className="flex flex-col items-center justify-center p-6 text-center hover:shadow-lg transition-shadow">
             <FilePlus2 className="h-12 w-12 text-primary mb-4" />
-            <CardTitle className="mb-2 text-xl">Create New Report</CardTitle>
-            <CardDescription className="mb-4">Start a new daily report for your project.</CardDescription>
+            <CardTitle className="mb-2 text-xl">Create Daily Log</CardTitle>
+            <CardDescription className="mb-4">Start a new daily log for your project.</CardDescription>
             <Button asChild size="lg">
-              <Link href="/foreman/new-report">New Report</Link>
+              <Link href="/foreman/new-report">New Daily Log</Link>
             </Button>
         </Card>
         <Card className="flex flex-col items-center justify-center p-6 text-center hover:shadow-lg transition-shadow">
