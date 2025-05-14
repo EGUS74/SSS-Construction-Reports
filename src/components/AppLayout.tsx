@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { ReactNode } from "react";
@@ -58,9 +59,9 @@ export function AppLayout({ children }: AppLayoutProps) {
           </SidebarFooter>
         </Sidebar>
 
-        <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-[var(--sidebar-width-icon)] transition-[padding-left] duration-300 ease-in-out group-data-[state=expanded]/sidebar-wrapper:sm:pl-[var(--sidebar-width)]">
+        <div className="flex flex-col flex-1 sm:pl-[var(--sidebar-width-icon)] transition-[padding-left] duration-300 ease-in-out group-data-[state=expanded]/sidebar-wrapper:sm:pl-[var(--sidebar-width)]">
           <Header />
-          <main className="flex-1 p-4 sm:px-6 sm:py-0 md:gap-8 overflow-auto">
+          <main className="flex-1 p-4 sm:px-6 md:gap-8 overflow-auto">
             {children}
           </main>
         </div>
