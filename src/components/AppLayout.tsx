@@ -45,7 +45,7 @@ export function AppLayout({ children }: AppLayoutProps) {
              {/* Placeholder for logo or app name if needed inside sidebar header when collapsed */}
              <Link href={role === "foreman" ? "/foreman/dashboard" : "/admin/dashboard"} className="flex items-center gap-2 group-data-[collapsible=icon]:hidden">
                 <Building className="h-6 w-6 text-sidebar-primary" />
-                <span className="font-semibold text-lg text-sidebar-primary">PipeLine Daily</span>
+                <span className="font-semibold text-lg text-sidebar-primary">QA Daily Report</span>
              </Link>
              <div className="group-data-[state=expanded]:hidden">
                 <Building className="h-6 w-6 text-sidebar-primary" />
