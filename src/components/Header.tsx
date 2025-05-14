@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { Building, UserCircle, Wifi, WifiOff, LogOut, Loader2, Lock, Clock } from "lucide-react";
+import { Building, UserCircle, Wifi, WifiOff, LogOut, Loader2, Lock, Clock, PanelLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -18,6 +18,7 @@ import type { UserRole } from "@/types";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 export function Header() {
   const { role, setRole, isOffline, isLoading } = useAppContext();
@@ -51,6 +52,7 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6 shadow-sm">
+      <SidebarTrigger className="h-8 w-8 md:h-9 md:w-9" />
       <Link href={role === "foreman" ? "/foreman/dashboard" : role === "admin" ? "/admin/dashboard" : "/"} className="flex items-center gap-2 text-lg font-semibold md:text-base flex-shrink-0">
         <Building className="h-6 w-6 text-primary" />
         <span className="font-bold text-lg md:text-xl text-primary truncate hidden sm:inline">PipeLine Daily</span>
