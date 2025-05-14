@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -5,11 +6,12 @@ import { useParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ArrowLeft, CalendarDays, MapPinIcon, CloudSun, Users2, Truck, Package, TrendingUp, AlertTriangle, Camera, PenLine, CheckCircle, Timer, Eye, MessageSquare, FileText } from "lucide-react";
+import { ArrowLeft, CalendarDays, MapPinIcon, CloudSun, Users2, Truck, Package, TrendingUp, AlertTriangle, Camera, PenLine, CheckCircle, Timer, Eye, MessageSquare, FileText, ExternalLink } from "lucide-react";
 import type { DailyReport } from "@/types";
 import { format, parseISO } from "date-fns";
 import Image from "next/image";
 import { useAppContext } from "@/contexts/AppContext";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 // Mock data - in a real app, this would come from an API
 const mockReports: DailyReport[] = [
@@ -24,7 +26,7 @@ const mockReports: DailyReport[] = [
     materialsUsed: "36inch Steel Pipe: 50m, Welding Rods E7018: 20kg, Gravel Type A: 10 tons",
     progressUpdates: "Laid 50m of pipe in Section Alpha. Completed 3 welds. Site clearing ongoing for Section Bravo. Trench depth achieved: 8ft.",
     risksIssues: "None reported today. All safety checks passed.",
-    photoDataUri: "https://placehold.co/600x400.png", // Placeholder
+    photoDataUri: "https://placehold.co/600x400.png", 
     photoFileName: "site_progress_20230315.jpg",
     digitalSignature: "John Doe",
     timestamp: "2023-03-15T17:00:00.000Z",
@@ -58,17 +60,17 @@ const mockReports: DailyReport[] = [
 ];
 
 
-const detailItems = [
+const detailItemsConfig = [
   { label: "Project ID", key: "projectId", icon: FileText },
-  { label: "GPS Location", key: "gpsLocation", icon: MapPinIcon },
+  // GPS Location will be handled separately
   { label: "Date", key: "date", icon: CalendarDays, format: (val: string) => format(parseISO(val), "PPP") },
-  { label: "Weather", key: "weather", icon: CloudSun },
-  { label: "Manpower", key: "manpower", icon: Users2 },
-  { label: "Equipment & Hours", key: "equipmentHours", icon: Truck },
-  { label: "Materials Used", key: "materialsUsed", icon: Package },
+  // Weather will be handled separately
+  { label: "Manpower", key: "manpower", icon: Users2, isTextArea: true },
+  { label: "Equipment & Hours", key: "equipmentHours", icon: Truck, isTextArea: true },
+  { label: "Materials Used", key: "materialsUsed", icon: Package, isTextArea: true },
   { label: "Progress Updates", key: "progressUpdates", icon: TrendingUp, isTextArea: true },
   { label: "Risks & Issues", key: "risksIssues", icon: AlertTriangle, isTextArea: true },
-  { label: "Foreman Signature", key: "digitalSignature", icon: PenLine },
+  { label: "My Signature", key: "digitalSignature", icon: PenLine },
   { label: "Submission Time", key: "timestamp", icon: Timer, format: (val: string) => format(parseISO(val), "PPP p") },
 ];
 
@@ -86,15 +88,41 @@ export default function ReportDetailPage() {
 
   useEffect(() => {
     if (params.reportId) {
-      const foundReport = mockReports.find(r => r.id === params.reportId);
+      // For foreman, filter mock reports by a known foreman name or assume they only see their own.
+      // This mock data assumes "John Doe" is the current foreman for demo purposes.
+      const foundReport = mockReports.find(r => r.id === params.reportId && r.foremanName === "John Doe");
       setReport(foundReport || null);
     }
   }, [params.reportId]);
 
-  const getStatusChip = (status: DailyReport["status"]) => {
+  const renderGpsLocation = (gpsLocation: string) => {
+    const coordsMatch = gpsLocation.match(/Coordinates:\s*([\d.-]+°?\s*[NS]),\s*([\d.-]+°?\s*[EW])/);
+    if (coordsMatch) {
+      const latStr = coordsMatch[1].replace('° N', 'N').replace('° S', 'S');
+      const lonStr = coordsMatch[2].replace('° E', 'E').replace('° W', 'W');
+      
+      let lat = parseFloat(latStr);
+      let lon = parseFloat(lonStr);
+
+      if (latStr.toUpperCase().includes('S')) lat = -lat;
+      if (lonStr.toUpperCase().includes('W')) lon = -lon;
+      
+      const query = `${lat},${lon}`;
+      const url = `https://www.google.com/maps?q=${query}`;
+      
+      return (
+        <a href={url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center">
+          {gpsLocation} <ExternalLink className="ml-1 h-4 w-4" />
+        </a>
+      );
+    }
+    return gpsLocation;
+  };
+
+  const getStatusChip = (status: DailyReport["status"], timestamp: string) => {
     let bgColor = "bg-gray-200";
     let textColor = "text-gray-800";
-    let IconComponent = Timer; // Default Icon
+    let IconComponent = Timer; 
 
     if (status === "Submitted") { bgColor = "bg-yellow-100"; textColor = "text-yellow-800"; IconComponent = Timer; }
     else if (status === "Reviewed") { bgColor = "bg-blue-100"; textColor = "text-blue-800"; IconComponent = Eye; }
@@ -102,10 +130,19 @@ export default function ReportDetailPage() {
     else if (status === "Rejected") { bgColor = "bg-red-100"; textColor = "text-red-800"; IconComponent = AlertTriangle; }
     
     return (
-      <div className={`flex items-center gap-2 text-sm px-3 py-1.5 rounded-full font-medium ${bgColor} ${textColor}`}>
-        <IconComponent className="h-5 w-5" />
-        Status: {status}
-      </div>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className={`flex items-center gap-2 text-sm px-3 py-1.5 rounded-full font-medium ${bgColor} ${textColor} cursor-default`}>
+              <IconComponent className="h-5 w-5" />
+              Status: {status}
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Last status update: {format(parseISO(timestamp), "PPP p")}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     );
   };
 
@@ -116,7 +153,7 @@ export default function ReportDetailPage() {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4 md:px-6">
+    <div className="max-w-7xl mx-auto py-8 px-4 md:px-6 lg:px-8">
       <Button variant="outline" onClick={() => router.back()} className="mb-6">
         <ArrowLeft className="mr-2 h-4 w-4" /> Back to Reports
       </Button>
@@ -125,23 +162,46 @@ export default function ReportDetailPage() {
         <CardHeader className="border-b">
           <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
             <CardTitle className="text-3xl font-bold">Report Details: {report.id}</CardTitle>
-            {getStatusChip(report.status)}
+            {getStatusChip(report.status, report.timestamp)}
           </div>
-          <CardDescription className="mt-1">Submitted by {report.foremanName} on {format(parseISO(report.timestamp), "PPP")}</CardDescription>
+          <CardDescription className="mt-1 text-base">Submitted on {format(parseISO(report.timestamp), "PPP")}</CardDescription>
         </CardHeader>
-        <CardContent className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-          {detailItems.map(item => (
+        <CardContent className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8">
+           {/* Special handling for GPS Location */}
+           <div>
+            <h3 className="text-base font-semibold text-muted-foreground flex items-center mb-1">
+              <MapPinIcon className="mr-2 h-5 w-5 text-primary" />
+              GPS Location
+            </h3>
+            <p className="text-lg">{renderGpsLocation(report.gpsLocation)}</p>
+          </div>
+
+          {/* Special handling for Weather */}
+          <div>
+            <h3 className="text-base font-semibold text-muted-foreground flex items-center mb-1">
+              <CloudSun className="mr-2 h-5 w-5 text-primary" />
+              Weather
+            </h3>
+            <p className="text-lg">
+              {report.weather}
+              <span className="block text-sm text-muted-foreground mt-1">
+                (Captured approx. {format(parseISO(report.timestamp), "h:mm a")}, Source: Field Observation)
+              </span>
+            </p>
+          </div>
+
+          {detailItemsConfig.map(item => (
             <div key={item.key} className={item.isTextArea ? "md:col-span-2" : ""}>
-              <h3 className="text-sm font-medium text-muted-foreground flex items-center mb-1">
+              <h3 className="text-base font-semibold text-muted-foreground flex items-center mb-1">
                 <item.icon className="mr-2 h-5 w-5 text-primary" />
                 {item.label}
               </h3>
               {item.isTextArea ? (
-                 <ScrollArea className="h-24 w-full rounded-md border p-3 bg-slate-50 text-sm">
+                 <ScrollArea className="h-32 w-full rounded-md border p-3 bg-slate-50 text-base">
                     <pre className="whitespace-pre-wrap font-sans">{report[item.key as keyof DailyReport] as string || "N/A"}</pre>
                  </ScrollArea>
               ) : (
-                 <p className="text-base">
+                 <p className="text-lg">
                    {item.format ? item.format(report[item.key as keyof DailyReport] as string) : report[item.key as keyof DailyReport] as string || "N/A"}
                  </p>
               )}
@@ -150,7 +210,7 @@ export default function ReportDetailPage() {
           
           {report.photoDataUri && (
             <div className="md:col-span-2">
-              <h3 className="text-sm font-medium text-muted-foreground flex items-center mb-1">
+              <h3 className="text-base font-semibold text-muted-foreground flex items-center mb-1">
                 <Camera className="mr-2 h-5 w-5 text-primary" /> Attached Photo
               </h3>
               <div className="mt-2 border rounded-lg overflow-hidden aspect-video relative max-w-lg">
@@ -171,8 +231,8 @@ export default function ReportDetailPage() {
               <h3 className="font-semibold text-lg mb-2 flex items-center text-primary">
                 <FileText className="mr-2 h-5 w-5" /> AI Generated Summary
               </h3>
-              <ScrollArea className="h-[100px]">
-                <p className="text-sm">{report.reportSummary}</p>
+              <ScrollArea className="h-[120px]">
+                <p className="text-base">{report.reportSummary}</p>
               </ScrollArea>
             </div>
           )}
@@ -182,8 +242,8 @@ export default function ReportDetailPage() {
               <h3 className="font-semibold text-lg mb-2 flex items-center">
                 <FileText className="mr-2 h-5 w-5" /> AI Generated Full Report Draft
               </h3>
-              <ScrollArea className="h-[200px]">
-                <pre className="text-xs whitespace-pre-wrap">{report.generatedReport}</pre>
+              <ScrollArea className="h-[250px]">
+                <pre className="text-sm whitespace-pre-wrap">{report.generatedReport}</pre>
               </ScrollArea>
             </div>
           )}
@@ -194,16 +254,16 @@ export default function ReportDetailPage() {
                 <MessageSquare className="mr-2 h-5 w-5" /> Project Manager's Comments
               </h3>
               <ScrollArea className="h-[100px]">
-                <p className="text-sm">{report.pmComments}</p>
+                <p className="text-base">{report.pmComments}</p>
               </ScrollArea>
             </div>
           )}
         </CardContent>
         <CardFooter className="border-t pt-6">
-           {/* Potential actions for foreman, e.g., "Request Clarification" if status is Rejected */}
-           <p className="text-xs text-muted-foreground">This report is currently {report.status.toLowerCase()}.</p>
+           <p className="text-sm text-muted-foreground">This report is currently {report.status.toLowerCase()}. If you have questions, contact your project manager.</p>
         </CardFooter>
       </Card>
     </div>
   );
 }
+

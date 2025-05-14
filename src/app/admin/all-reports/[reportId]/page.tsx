@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -7,12 +8,13 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, CalendarDays, MapPinIcon, CloudSun, Users2, Truck, Package, TrendingUp, AlertTriangle, Camera, PenLine, CheckCircle, XCircle, MessageSquare, FileText, Eye, Send, Timer } from "lucide-react";
+import { ArrowLeft, CalendarDays, MapPinIcon, CloudSun, Users2, Truck, Package, TrendingUp, AlertTriangle, Camera, PenLine, CheckCircle, XCircle, MessageSquare, FileText, Eye, Send, Timer, ExternalLink } from "lucide-react";
 import type { DailyReport } from "@/types";
 import { format, parseISO } from "date-fns";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import { useAppContext } from "@/contexts/AppContext";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 // Mock data - in a real app, this would come from an API
 const mockReports: DailyReport[] = [
@@ -27,14 +29,14 @@ const mockReports: DailyReport[] = [
   },
 ];
 
-const detailItems = [
+const detailItemsConfig = [
   { label: "Project ID", key: "projectId", icon: FileText },
-  { label: "GPS Location", key: "gpsLocation", icon: MapPinIcon },
+  // GPS Location will be handled separately for link generation
   { label: "Date", key: "date", icon: CalendarDays, format: (val: string) => format(parseISO(val), "PPP") },
-  { label: "Weather", key: "weather", icon: CloudSun },
-  { label: "Manpower", key: "manpower", icon: Users2 },
-  { label: "Equipment & Hours", key: "equipmentHours", icon: Truck },
-  { label: "Materials Used", key: "materialsUsed", icon: Package },
+  // Weather will be handled separately
+  { label: "Manpower", key: "manpower", icon: Users2, isTextArea: true },
+  { label: "Equipment & Hours", key: "equipmentHours", icon: Truck, isTextArea: true },
+  { label: "Materials Used", key: "materialsUsed", icon: Package, isTextArea: true },
   { label: "Progress Updates", key: "progressUpdates", icon: TrendingUp, isTextArea: true },
   { label: "Risks & Issues", key: "risksIssues", icon: AlertTriangle, isTextArea: true },
   { label: "Foreman Signature", key: "digitalSignature", icon: PenLine },
@@ -74,12 +76,8 @@ export default function AdminReportReviewPage() {
   const handleReportAction = async (newStatus: "Approved" | "Rejected" | "Reviewed") => {
     if (!report) return;
     setIsSubmittingAction(true);
-    // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // In a real app, update the report in the backend
     const updatedReport = { ...report, status: newStatus, pmComments: pmComments || report.pmComments };
-    // Find and update in mock data for demo purposes
     const reportIndex = mockReports.findIndex(r => r.id === report.id);
     if (reportIndex !== -1) mockReports[reportIndex] = updatedReport;
     
@@ -92,16 +90,41 @@ export default function AdminReportReviewPage() {
     });
   };
   
+  const renderGpsLocation = (gpsLocation: string) => {
+    const coordsMatch = gpsLocation.match(/Coordinates:\s*([\d.-]+°?\s*[NS]),\s*([\d.-]+°?\s*[EW])/);
+    if (coordsMatch) {
+      const latStr = coordsMatch[1].replace('° N', 'N').replace('° S', 'S');
+      const lonStr = coordsMatch[2].replace('° E', 'E').replace('° W', 'W');
+      
+      // Convert to decimal if needed, Google Maps can often handle mixed formats
+      let lat = parseFloat(latStr);
+      let lon = parseFloat(lonStr);
+
+      if (latStr.toUpperCase().includes('S')) lat = -lat;
+      if (lonStr.toUpperCase().includes('W')) lon = -lon;
+      
+      const query = `${lat},${lon}`;
+      const url = `https://www.google.com/maps?q=${query}`;
+      
+      return (
+        <a href={url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center">
+          {gpsLocation} <ExternalLink className="ml-1 h-4 w-4" />
+        </a>
+      );
+    }
+    return gpsLocation;
+  };
+
   if (role !== "admin") return null;
 
   if (!report) {
     return <div className="container mx-auto py-8 text-center">Loading report details or report not found...</div>;
   }
 
-  const getStatusChip = (status: DailyReport["status"]) => {
+  const getStatusChip = (status: DailyReport["status"], timestamp: string) => {
     let bgColor = "bg-gray-200";
     let textColor = "text-gray-800";
-    let IconComponent = Timer; // Default Icon
+    let IconComponent = Timer;
 
     if (status === "Submitted") { bgColor = "bg-yellow-100"; textColor = "text-yellow-800"; IconComponent = Timer; }
     else if (status === "Reviewed") { bgColor = "bg-blue-100"; textColor = "text-blue-800"; IconComponent = Eye; }
@@ -109,15 +132,24 @@ export default function AdminReportReviewPage() {
     else if (status === "Rejected") { bgColor = "bg-red-100"; textColor = "text-red-800"; IconComponent = AlertTriangle; }
     
     return (
-      <div className={`flex items-center gap-2 text-sm px-3 py-1.5 rounded-full font-medium ${bgColor} ${textColor}`}>
-        <IconComponent className="h-5 w-5" />
-        Status: {status}
-      </div>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className={`flex items-center gap-2 text-sm px-3 py-1.5 rounded-full font-medium ${bgColor} ${textColor} cursor-default`}>
+              <IconComponent className="h-5 w-5" />
+              Status: {status}
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Last status update: {format(parseISO(timestamp), "PPP p")}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     );
   };
 
   return (
-    <div className="container mx-auto py-8 px-4 md:px-6">
+    <div className="max-w-7xl mx-auto py-8 px-4 md:px-6 lg:px-8">
       <Button variant="outline" onClick={() => router.back()} className="mb-6">
         <ArrowLeft className="mr-2 h-4 w-4" /> Back to All Reports
       </Button>
@@ -126,23 +158,46 @@ export default function AdminReportReviewPage() {
         <CardHeader className="border-b">
            <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
             <CardTitle className="text-3xl font-bold">Review Report: {report.id}</CardTitle>
-             {getStatusChip(report.status)}
+             {getStatusChip(report.status, report.timestamp)}
           </div>
-          <CardDescription className="mt-1">Submitted by {report.foremanName} ({report.digitalSignature}) on {format(parseISO(report.timestamp), "PPP")}</CardDescription>
+          <CardDescription className="mt-1 text-base">Submitted by {report.foremanName} ({report.digitalSignature}) on {format(parseISO(report.timestamp), "PPP")}</CardDescription>
         </CardHeader>
-        <CardContent className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-          {detailItems.map(item => (
+        <CardContent className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8">
+          {/* Special handling for GPS Location */}
+          <div>
+            <h3 className="text-base font-semibold text-muted-foreground flex items-center mb-1">
+              <MapPinIcon className="mr-2 h-5 w-5 text-primary" />
+              GPS Location
+            </h3>
+            <p className="text-lg">{renderGpsLocation(report.gpsLocation)}</p>
+          </div>
+
+          {/* Special handling for Weather */}
+          <div>
+            <h3 className="text-base font-semibold text-muted-foreground flex items-center mb-1">
+              <CloudSun className="mr-2 h-5 w-5 text-primary" />
+              Weather
+            </h3>
+            <p className="text-lg">
+              {report.weather}
+              <span className="block text-sm text-muted-foreground mt-1">
+                (Captured approx. {format(parseISO(report.timestamp), "h:mm a")}, Source: Field Observation)
+              </span>
+            </p>
+          </div>
+          
+          {detailItemsConfig.map(item => (
             <div key={item.key} className={item.isTextArea ? "md:col-span-2" : ""}>
-              <h3 className="text-sm font-medium text-muted-foreground flex items-center mb-1">
+              <h3 className="text-base font-semibold text-muted-foreground flex items-center mb-1">
                 <item.icon className="mr-2 h-5 w-5 text-primary" />
                 {item.label}
               </h3>
               {item.isTextArea ? (
-                 <ScrollArea className="h-24 w-full rounded-md border p-3 bg-slate-50 text-sm">
+                 <ScrollArea className="h-32 w-full rounded-md border p-3 bg-slate-50 text-base">
                     <pre className="whitespace-pre-wrap font-sans">{report[item.key as keyof DailyReport] as string || "N/A"}</pre>
                  </ScrollArea>
               ) : (
-                 <p className="text-base">
+                 <p className="text-lg">
                    {item.format ? item.format(report[item.key as keyof DailyReport] as string) : report[item.key as keyof DailyReport] as string || "N/A"}
                  </p>
               )}
@@ -151,7 +206,7 @@ export default function AdminReportReviewPage() {
           
           {report.photoDataUri && (
             <div className="md:col-span-2">
-              <h3 className="text-sm font-medium text-muted-foreground flex items-center mb-1">
+              <h3 className="text-base font-semibold text-muted-foreground flex items-center mb-1">
                 <Camera className="mr-2 h-5 w-5 text-primary" /> Attached Photo
               </h3>
               <div className="mt-2 border rounded-lg overflow-hidden aspect-video relative max-w-lg">
@@ -172,8 +227,8 @@ export default function AdminReportReviewPage() {
               <h3 className="font-semibold text-lg mb-2 flex items-center text-primary">
                 <FileText className="mr-2 h-5 w-5" /> AI Generated Summary
               </h3>
-              <ScrollArea className="h-[100px]">
-                <p className="text-sm">{report.reportSummary}</p>
+              <ScrollArea className="h-[120px]">
+                <p className="text-base">{report.reportSummary}</p>
               </ScrollArea>
             </div>
           )}
@@ -183,14 +238,14 @@ export default function AdminReportReviewPage() {
               <h3 className="font-semibold text-lg mb-2 flex items-center">
                 <FileText className="mr-2 h-5 w-5" /> AI Generated Full Report Draft
               </h3>
-              <ScrollArea className="h-[200px]">
-                <pre className="text-xs whitespace-pre-wrap">{report.generatedReport}</pre>
+              <ScrollArea className="h-[250px]">
+                <pre className="text-sm whitespace-pre-wrap">{report.generatedReport}</pre>
               </ScrollArea>
             </div>
           )}
 
           <div className="md:col-span-2 space-y-2">
-            <Label htmlFor="pmComments" className="text-sm font-medium text-muted-foreground flex items-center">
+            <Label htmlFor="pmComments" className="text-base font-semibold text-muted-foreground flex items-center">
               <MessageSquare className="mr-2 h-5 w-5 text-primary" />
               Project Manager's Comments
             </Label>
@@ -199,7 +254,7 @@ export default function AdminReportReviewPage() {
               value={pmComments}
               onChange={(e) => setPmComments(e.target.value)}
               placeholder="Add comments for the foreman or client..."
-              className="min-h-[100px]"
+              className="min-h-[120px] text-base"
               disabled={report.status === 'Approved' || isSubmittingAction}
             />
           </div>
@@ -235,7 +290,7 @@ export default function AdminReportReviewPage() {
           )}
            {(report.status === 'Approved' || report.status === 'Rejected') && (
             <Button 
-                onClick={() => { /* Simulate sending to client */ 
+                onClick={() => { 
                     toast({title: "Action", description: "Client notification functionality not implemented in this demo."});
                 }} 
                 disabled={isSubmittingAction}
@@ -249,3 +304,4 @@ export default function AdminReportReviewPage() {
     </div>
   );
 }
+
