@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { Building, Wifi, WifiOff, LogOut, Loader2, Lock, Clock, PanelLeft, CircleUserRound } from "lucide-react";
+import { Building, Wifi, WifiOff, LogOut, Loader2, Lock, Clock, CircleUserRound, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -13,12 +13,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAppContext } from "@/contexts/AppContext";
 import type { UserRole } from "@/types";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 
 export function Header() {
   const { role, setRole, isOffline, isLoading } = useAppContext();
@@ -51,7 +51,18 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6 shadow-sm">
-      <SidebarTrigger className="h-8 w-8 md:h-9 md:w-9" />
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button variant="ghost" size="icon" className="h-8 w-8 md:h-9 md:w-9">
+            <Settings className="h-5 w-5" />
+            <span className="sr-only">Settings</span>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Settings</p>
+        </TooltipContent>
+      </Tooltip>
+      
       <Link href={role === "foreman" ? "/foreman/dashboard" : role === "admin" ? "/admin/dashboard" : "/"} className="flex items-center gap-2 text-lg font-semibold md:text-base flex-shrink-0">
         <Building className="h-6 w-6 text-primary" />
         <span className="font-bold text-lg md:text-xl text-primary truncate hidden sm:inline">QA Daily Report</span>

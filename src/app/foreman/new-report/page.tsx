@@ -86,7 +86,7 @@ export default function NewReportPage() {
         <CardHeader>
           <CardTitle className="text-3xl font-bold tracking-tight flex items-center">
              <FileText className="mr-3 h-8 w-8 text-primary" />
-            Create Daily Log
+            Daily Log
           </CardTitle>
           <CardDescription className="text-md">
             Fill in the details for today's activities. Ensure all information is accurate and complete.
