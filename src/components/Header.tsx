@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { Building, UserCircle, Wifi, WifiOff, LogOut, Loader2, Lock, Clock, PanelLeft } from "lucide-react";
+import { Building, UserCircle, Wifi, WifiOff, LogOut, Loader2, Lock, Clock, PanelLeft, CircleUserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -76,11 +76,11 @@ export function Header() {
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full">
+            <Button variant="ghost" size="icon" className="rounded-full" aria-label="User account menu">
               <Avatar>
-                <AvatarImage src="https://placehold.co/40x40.png" alt="User Avatar" data-ai-hint="user avatar" />
+                {/* <AvatarImage src="https://placehold.co/40x40.png" alt="User Avatar" data-ai-hint="user avatar" /> */}
                 <AvatarFallback>
-                  {role ? role.substring(0, 1).toUpperCase() : <UserCircle />}
+                  <CircleUserRound className="h-6 w-6" />
                 </AvatarFallback>
               </Avatar>
             </Button>
@@ -109,4 +109,3 @@ export function Header() {
     </header>
   );
 }
-
