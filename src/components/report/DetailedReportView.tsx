@@ -69,8 +69,8 @@ export function DetailedReportView({ report, onDownloadPdf, onDownloadExcel }: D
           <Image src="https://placehold.co/120x50.png?text=SSS" alt="Company Logo" width={120} height={50} data-ai-hint="company logo" className="mr-4"/>
           <div>
             <h1 className="font-bold text-base">SSS Construction Reports</h1>
-            <p className="text-xs">2237 33rd Street, NE</p>
-            <p className="text-xs">Washington, District of Columbia 20018</p>
+            <p className="text-xs">222 Main St.</p>
+            <p className="text-xs">My Good City, My State, 11011</p>
             <p className="text-xs">P: +12026369535</p>
           </div>
         </div>
