@@ -52,7 +52,7 @@ export function DetailedReportView({ report, onDownloadPdf, onDownloadExcel }: D
   ];
 
   const manpowerLogData = [
-    { no: 1, contact: "Fort Myer Construction Corporation", workers: 8, hours: 8.0, totalHours: 64.0, location: "HERNDON PARKWAY & SPRING ST", comments: "PM, SUP, FOR, OPR, FLG, LAB", createdBy: report.foremanName || "N/A" },
+    { no: 1, contact: "SSS Construction Reports", workers: 8, hours: 8.0, totalHours: 64.0, location: "HERNDON PARKWAY & SPRING ST", comments: "PM, SUP, FOR, OPR, FLG, LAB", createdBy: report.foremanName || "N/A" },
     { no: 2, contact: "PESSOA CONSTRUCTION CO., INC.", workers: 0, hours: 8.0, totalHours: 0.0, location: "Herndon Parkway", comments: "FOR, OPR, LAB", createdBy: report.foremanName || "N/A" },
     { no: 3, contact: "S&S PARTNERS, LLC", workers: 6, hours: 8.0, totalHours: 48.0, location: "Herndon Parkway", comments: "FOR, OPR, LAB", createdBy: report.foremanName || "N/A" },
     { no: 4, contact: "JENSPY, INC.", workers: 0, hours: 8.0, totalHours: 0.0, location: "HERNDON PARKWAY & SPRING ST", comments: "FOR, OPR, LAB", createdBy: report.foremanName || "N/A" },
@@ -66,9 +66,9 @@ export function DetailedReportView({ report, onDownloadPdf, onDownloadExcel }: D
       {/* Report Header */}
       <header className="flex justify-between items-start mb-4">
         <div className="flex items-center">
-          <Image src="https://placehold.co/120x50.png?text=FMC" alt="Company Logo" width={120} height={50} data-ai-hint="company logo" className="mr-4"/>
+          <Image src="https://placehold.co/120x50.png?text=SSS" alt="Company Logo" width={120} height={50} data-ai-hint="company logo" className="mr-4"/>
           <div>
-            <h1 className="font-bold text-base">Fort Myer Construction Corporation</h1>
+            <h1 className="font-bold text-base">SSS Construction Reports</h1>
             <p className="text-xs">2237 33rd Street, NE</p>
             <p className="text-xs">Washington, District of Columbia 20018</p>
             <p className="text-xs">P: +12026369535</p>
@@ -281,7 +281,7 @@ export function DetailedReportView({ report, onDownloadPdf, onDownloadExcel }: D
       {/* Report Footer */}
       <Separator className="my-6 print:hidden"/>
       <footer className="flex justify-between items-center text-xs pt-4 border-t border-gray-300 mt-auto">
-        <p>Fort Myer Construction Corporation</p>
+        <p>SSS Construction Reports</p>
         <p>Page 1 of 1 (Pagination TBD)</p>
         <p>Printed On: {format(new Date(), "MMM d, yyyy 'at' h:mm a zzz")}</p>
       </footer>
@@ -302,3 +302,4 @@ export function DetailedReportView({ report, onDownloadPdf, onDownloadExcel }: D
     </div>
   );
 }
+
